@@ -1,31 +1,24 @@
 # main.py
 
 # --- 1. IMPORTS ---
-# We are importing pre-built Python packages (libraries) to provide our script with specific "tools".
-# Think of this as gathering your toolbox before starting a project.
-import os  # The 'os' library lets us interact with the operating system, for tasks like checking if a folder exists, creating folders, and moving files.
-import time # The 'time' library gives us time-related functions. We will use it later to pause our script.
-from PIL import Image # From the 'Pillow' library (PIL), we import the 'Image' tool, which is essential for opening and reading pixel data from image files.
-import pytesseract # This is the Python connector for Tesseract. It acts as a bridge between our script and the Tesseract-OCR engine you installed.
-from googletrans import Translator, LANGUAGES # From the 'googletrans' library, we import the 'Translator' tool to perform the translation, and 'LANGUAGES' which is a helpful list of all supported languages.
+import os  # Provides tools to interact with the operating system, like managing files and folders.
+import time  # Provides time-related functions, used here to pause the script.
+from PIL import Image  # From the Pillow library, used for opening and processing image files.
+import pytesseract  # The Python interface for the Tesseract-OCR engine.
+from googletrans import Translator, LANGUAGES  # From the googletrans library, used for translation.
 
 # --- 2. CONFIGURATION ---
-# These are global settings for our script. By keeping them at the top,
-# we can easily change how the script behaves without searching through all the code.
+# The full path to the folder that the script will monitor for new files.
 FOLDER_TO_WATCH = r'F:\image_translator\images_to_process'
-PROCESSED_FOLDER = os.path.join(FOLDER_TO_WATCH, 'processed') # Define the processed folder path once
-
-# TESSERACT EXECUTABLE PATH: The pytesseract library needs to know where the Tesseract program
-# is located on your computer. If it's not in a standard system location, we must provide the full path to it.
+# The full path to the subfolder where processed files will be moved.
+PROCESSED_FOLDER = os.path.join(FOLDER_TO_WATCH, 'processed')
+# The full path to the Tesseract executable file. This is required on Windows.
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
+# --- 3. HELPER FUNCTIONS ---
 
-# --- 3. SETUP FUNCTION ---
 def setup_environment():
-    """
-    This function checks if the required folders exist and creates them if they don't.
-    This prevents the script from crashing if a folder is missing.
-    """
+    """Checks if the required folders exist and creates them if they don't."""
     if not os.path.exists(FOLDER_TO_WATCH):
         print(f"Creating watch folder: '{FOLDER_TO_WATCH}'")
         os.makedirs(FOLDER_TO_WATCH)
@@ -34,15 +27,12 @@ def setup_environment():
         os.makedirs(PROCESSED_FOLDER)
     print("-" * 30)
     print("Environment setup complete.")
-    print(f"Watching for images in: {FOLDER_TO_WATCH}")
+    print(f"Watching for images and text files in: {FOLDER_TO_WATCH}")
     print("Press Ctrl+C to stop the script.")
     print("-" * 30)
 
-# --- 4. OCR FUNCTION ---
 def extract_text_from_image(image_path):
-    """
-    Takes the file path of an image, opens it, and uses Tesseract to extract text.
-    """
+    """Takes an image file path and uses Tesseract to extract text."""
     try:
         with Image.open(image_path) as img:
             text = pytesseract.image_to_string(img)
@@ -54,11 +44,21 @@ def extract_text_from_image(image_path):
         print(f"Could not read image or perform OCR on '{os.path.basename(image_path)}'. Error: {e}")
         return None
 
-# --- 5. TRANSLATION FUNCTION ---
+def read_text_from_file(file_path):
+    """
+    Opens a plain text file (.txt) and reads its entire content into a single string.
+    The 'encoding="utf-8"' parameter is crucial for correctly handling special characters
+    and text from a wide variety of languages.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read().strip()
+    except Exception as e:
+        print(f"Could not read text file '{os.path.basename(file_path)}'. Error: {e}")
+        return None
+
 def translate_text_to_english(text):
-    """
-    Takes a string of text and translates it to English.
-    """
+    """Takes a string of text and translates it to English using the googletrans library."""
     if not text:
         return None
     try:
@@ -73,69 +73,68 @@ def translate_text_to_english(text):
         print(f"Translation failed. Could not connect to translation service. Error: {e}")
         return None
 
-# --- 6. CORE PROCESSING FUNCTION ---
+# --- 4. CORE PROCESSING FUNCTION ---
 def process_files_in_folder():
-    """
-    Checks for files in the watch folder, processes one file, and then moves it.
-    """
-    # os.listdir() gets everything in the folder (files and other folders).
-    # We use a list comprehension to build a list of only the files.
-    # os.path.isfile() returns True if the path is a file.
+    """Checks for files, processes one based on its type, and then moves it."""
     try:
         files = [f for f in os.listdir(FOLDER_TO_WATCH) if os.path.isfile(os.path.join(FOLDER_TO_WATCH, f))]
     except FileNotFoundError:
         print(f"ERROR: Watch folder not found at '{FOLDER_TO_WATCH}'. Exiting.")
-        return # Exit the function if the folder doesn't exist.
+        return
 
-    # If the list of files is empty, there's nothing to do.
     if not files:
-        return # Exit the function and wait for the next check.
+        return
 
-    # Get the name of the first file in the list.
     filename = files[0]
-    image_path = os.path.join(FOLDER_TO_WATCH, filename)
-    
+    file_path = os.path.join(FOLDER_TO_WATCH, filename)
+    original_text = None  # Initialize a variable to hold the extracted text.
+
     print(f"\n>>> Found new file: '{filename}'")
-    
-    # --- Step 1: Extract text ---
-    original_text = extract_text_from_image(image_path)
-    
-    # --- Step 2: Translate text (if any was found) ---
+
+    # This block determines how to process the file based on its extension.
+    # os.path.splitext() splits "file.txt" into ("file", ".txt").
+    # We get the extension at index [1] and convert it to lowercase for reliable comparison.
+    file_extension = os.path.splitext(filename)[1].lower()
+
+    if file_extension in ['.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif']:
+        print("File identified as an image. Performing OCR...")
+        original_text = extract_text_from_image(file_path)
+    elif file_extension == '.txt':
+        print("File identified as a text file. Reading content...")
+        original_text = read_text_from_file(file_path)
+    else:
+        # If the file extension is not in our supported lists, we skip processing.
+        print(f"Unsupported file type: '{file_extension}'. This file will be moved without processing.")
+
+    # This block handles the translation and printing of results.
+    # It only runs if the 'original_text' variable successfully received content.
     if original_text:
-        print(f"\n--- Extracted Text ---\n{original_text}\n----------------------")
+        print(f"\n--- Original Text ---\n{original_text}\n---------------------")
         translation_info = translate_text_to_english(original_text)
         if translation_info:
             print(f"Detected Language: {translation_info['source_lang_name']}")
             print(f"\n--- Translated Text (English) ---\n{translation_info['translated_text']}\n---------------------------------")
     else:
-        # This 'else' runs if extract_text_from_image returned None or an empty string.
-        print("No text could be detected in the image.")
+        # This message appears if no text was extracted, or the file type was unsupported.
+        print("No text was extracted from the file.")
 
-    # --- Step 3: Move the processed file ---
+    # This block moves the file to the 'processed' folder after attempting to process it.
     try:
         destination_path = os.path.join(PROCESSED_FOLDER, filename)
-        os.rename(image_path, destination_path)
+        os.rename(file_path, destination_path)
         print(f"Moved '{filename}' to the 'processed' folder.")
     except Exception as e:
         print(f"ERROR: Could not move file '{filename}'. It may be in use. Error: {e}")
 
-
-# --- 7. MAIN EXECUTION BLOCK ---
+# --- 5. MAIN EXECUTION BLOCK ---
 if __name__ == "__main__":
     setup_environment()
-    
-    # This 'try...except' block lets us stop the script gracefully.
     try:
-        # This is the main loop of our program. 'while True:' means it will run forever.
+        # This 'while True' loop makes the script run continuously.
         while True:
-            # Call our processing function.
             process_files_in_folder()
-            
-            # Tell the script to pause for 5 seconds.
-            # This prevents it from checking the folder thousands of times a second, which would waste CPU resources.
+            # The script pauses for 5 seconds before checking the folder again.
             time.sleep(5)
-            
     except KeyboardInterrupt:
-        # If the user presses Ctrl+C in the terminal, the 'while' loop will be interrupted
-        # and this code will run instead of showing an ugly error message.
+        # This allows the user to stop the script cleanly by pressing Ctrl+C.
         print("\nScript stopped by user. Goodbye!")

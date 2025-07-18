@@ -7,9 +7,11 @@ This is a Python script that monitors a folder for new image files, extracts any
 
 ## Features
 
-* Automatically processes new images dropped into a folder.
-* Uses Tesseract for Optical Character Recognition (OCR).
-* Translates text from any language supported by Google Translate into English.
+* Automatically processes new files dropped into a folder.
+* Handles multiple file types:
+    * **Images (`.png`, `.jpg`, etc.):** Extracts text using Tesseract OCR.
+    * **Text Files (`.txt`):** Reads text content directly.
+* Translates extracted text from any language into English.
 * Moves processed files to a separate subfolder to avoid reprocessing.
 
 ## How to Use
