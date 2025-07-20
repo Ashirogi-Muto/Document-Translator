@@ -1,4 +1,4 @@
-[![Python Linter](https://github.com/Ashirogi-Muto/DocumentTranslator/actions/workflows/linter.yml/badge.svg)](https://github.com/Ashirogi-Muto/DocumentTranslator/actions/workflows/linter.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Linter](https://github.com/Ashirogi-Muto/Document-Translator/actions/workflows/linter.yml/badge.svg)](https://github.com/Ashirogi-Muto/Document-Translator/actions/workflows/linter.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Document Text Translator
 
