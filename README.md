@@ -23,8 +23,8 @@ This is a Python script that monitors a folder for new document files, extracts 
     * Tesseract-OCR engine installed on your system.
 2.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/Ashirogi-Muto/DocumentTranslator.git](https://github.com/Ashirogi-Muto/DocumentTranslator.git)
-    cd DocumentTranslator
+    git clone [https://github.com/Ashirogi-Muto/Document-Translator.git](https://github.com/Ashirogi-Muto/Document-Translator.git)
+    cd Document-Translator
     ```
 3.  **Install Python libraries:**
     ```bash
