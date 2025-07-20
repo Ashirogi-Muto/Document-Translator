@@ -1,7 +1,7 @@
 [![Python Linter](https://github.com/Ashirogi-Muto/ImageTranslator/actions/workflows/linter.yml/badge.svg)](https://github.com/Ashirogi-Muto/ImageTranslator/actions/workflows/linter.yml)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-# Image Text Translator
+# Document Text Translator
 
 This is a Python script that monitors a folder for new image files, extracts any text from them using Tesseract OCR, and then translates that text into English using the Google Translate API.
 
