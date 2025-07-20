@@ -1,9 +1,8 @@
-[![Python Linter](https://github.com/Ashirogi-Muto/ImageTranslator/actions/workflows/linter.yml/badge.svg)](https://github.com/Ashirogi-Muto/ImageTranslator/actions/workflows/linter.yml)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
+[![Python Linter](https://github.com/Ashirogi-Muto/DocumentTranslator/actions/workflows/linter.yml/badge.svg)](https://github.com/Ashirogi-Muto/DocumentTranslator/actions/workflows/linter.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Document Text Translator
 
-This is a Python script that monitors a folder for new image files, extracts any text from them using Tesseract OCR, and then translates that text into English using the Google Translate API.
+This is a Python script that monitors a folder for new document files, extracts any text from them, and then translates that text into English.
 
 ## Features
 
@@ -24,18 +23,18 @@ This is a Python script that monitors a folder for new image files, extracts any
     * Tesseract-OCR engine installed on your system.
 2.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/Ashirogi-Muto/ImageTranslator.git](https://github.com/Ashirogi-Muto/ImageTranslator.git)
-    cd ImageTranslator
+    git clone [https://github.com/Ashirogi-Muto/DocumentTranslator.git](https://github.com/Ashirogi-Muto/DocumentTranslator.git)
+    cd DocumentTranslator
     ```
 3.  **Install Python libraries:**
     ```bash
     pip install -r requirements.txt
     ```
 4.  **Configure the script:**
-    * Open `main.py` and update the `FOLDER_TO_WATCH` variable.
+    * Open `main.py` and update the `FOLDER_TO_WATCH` variable if needed.
     * Ensure the `pytesseract.pytesseract.tesseract_cmd` path points to your Tesseract installation.
 5.  **Run the script:**
     ```bash
     python main.py
     ```
-6.  Drop any image file containing text into the folder you are watching. The translated text will appear in the terminal.
+6.  Drop any supported file into the folder you are watching. The translated text will appear in the terminal.
