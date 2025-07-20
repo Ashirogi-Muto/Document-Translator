@@ -94,6 +94,7 @@ pycountry==24.6.1
 pycountry-convert==0.7.2
 pycparser==2.22
 Pygments==2.19.1
+PyMuPDF==1.26.3
 pyreadline3==3.5.4
 PySocks==1.7.1
 pytesseract==0.3.13
