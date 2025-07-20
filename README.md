@@ -31,7 +31,6 @@ This is a Python script that monitors a folder for new image files, extracts any
     ```bash
     pip install -r requirements.txt
     ```
-    *(Note: We will create the `requirements.txt` file in a later step!)*
 4.  **Configure the script:**
     * Open `main.py` and update the `FOLDER_TO_WATCH` variable.
     * Ensure the `pytesseract.pytesseract.tesseract_cmd` path points to your Tesseract installation.
