@@ -13,6 +13,7 @@ This is a Python script that monitors a folder for new image files, extracts any
     * **Text Files (`.txt`):** Reads text content directly.
     * **PDFs (`.pdf`):** Extracts text from both text-based and scanned (image-based) PDFs.
     * **Word Documents (`.docx`):** Extracts text from Microsoft Word files.
+    * **PowerPoint Presentations (`.pptx`):** Extracts text from Microsoft PowerPoint files.
 * Translates extracted text from any language into English.
 * Moves processed files to a separate subfolder to avoid reprocessing.
 

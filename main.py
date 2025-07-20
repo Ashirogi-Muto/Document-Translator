@@ -5,6 +5,7 @@ import os
 import time
 import fitz  # PyMuPDF library for handling PDFs
 import docx  # python-docx library for handling Word documents
+import pptx  # python-pptx library for handling PowerPoint presentations
 from PIL import Image
 import pytesseract
 from googletrans import Translator, LANGUAGES
@@ -26,7 +27,7 @@ def setup_environment():
         os.makedirs(PROCESSED_FOLDER)
     print("-" * 30)
     print("Environment setup complete.")
-    print(f"Watching for images, text, PDF, and Word files in: {FOLDER_TO_WATCH}")
+    print(f"Watching for all supported file types in: {FOLDER_TO_WATCH}")
     print("Press Ctrl+C to stop the script.")
     print("-" * 30)
 
@@ -77,12 +78,27 @@ def extract_text_from_docx(file_path):
     """Extracts text from a Microsoft Word (.docx) file."""
     try:
         document = docx.Document(file_path)
-        # Create a list of the text from each paragraph in the document
         full_text = [para.text for para in document.paragraphs]
-        # Join the list of paragraphs into a single string with newlines
         return "\n".join(full_text).strip()
     except Exception as e:
         print(f"Could not process Word file '{os.path.basename(file_path)}'. Error: {e}")
+        return None
+
+def extract_text_from_pptx(file_path):
+    """Extracts text from a Microsoft PowerPoint (.pptx) file."""
+    try:
+        presentation = pptx.Presentation(file_path)
+        full_text = []
+        # Iterate through each slide in the presentation
+        for slide in presentation.slides:
+            # Iterate through each shape on the slide
+            for shape in slide.shapes:
+                # Check if the shape has a text frame
+                if hasattr(shape, "text"):
+                    full_text.append(shape.text)
+        return "\n".join(full_text).strip()
+    except Exception as e:
+        print(f"Could not process PowerPoint file '{os.path.basename(file_path)}'. Error: {e}")
         return None
 
 def translate_text_to_english(text):
@@ -133,6 +149,9 @@ def process_files_in_folder():
     elif file_extension == '.docx':
         print("File identified as a Word document. Extracting text...")
         original_text = extract_text_from_docx(file_path)
+    elif file_extension == '.pptx':
+        print("File identified as a PowerPoint presentation. Extracting text...")
+        original_text = extract_text_from_pptx(file_path)
     else:
         print(f"Unsupported file type: '{file_extension}'. This file will be moved without processing.")
 
