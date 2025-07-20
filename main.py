@@ -4,6 +4,7 @@
 import os
 import time
 import fitz  # PyMuPDF library for handling PDFs
+import docx  # python-docx library for handling Word documents
 from PIL import Image
 import pytesseract
 from googletrans import Translator, LANGUAGES
@@ -25,17 +26,13 @@ def setup_environment():
         os.makedirs(PROCESSED_FOLDER)
     print("-" * 30)
     print("Environment setup complete.")
-    print(f"Watching for images, text, and PDF files in: {FOLDER_TO_WATCH}")
+    print(f"Watching for images, text, PDF, and Word files in: {FOLDER_TO_WATCH}")
     print("Press Ctrl+C to stop the script.")
     print("-" * 30)
 
 def extract_text_from_image(image_path_or_object):
-    """
-    Takes an image file path or an image object and uses Tesseract to extract text.
-    This function is now more flexible to accept image data directly from the PDF function.
-    """
+    """Takes an image file path or an image object and uses Tesseract to extract text."""
     try:
-        # The 'image_path_or_object' can be a file path (string) or an Image object.
         text = pytesseract.image_to_string(image_path_or_object)
         return text.strip()
     except pytesseract.TesseractNotFoundError:
@@ -55,40 +52,37 @@ def read_text_from_file(file_path):
         return None
 
 def extract_text_from_pdf(file_path):
-    """
-    Extracts text from a PDF file. It handles both text-based and image-based PDFs.
-    """
+    """Extracts text from a PDF file, handling both text-based and image-based pages."""
     try:
-        # Open the PDF file
         pdf_document = fitz.open(file_path)
         full_text = []
-
-        # Iterate through each page of the PDF
         for page_num in range(len(pdf_document)):
             page = pdf_document.load_page(page_num)
-            
-            # First, try to extract text directly. This works for text-based PDFs.
             page_text = page.get_text().strip()
-            
-            # If direct text extraction yields little or no text, assume it's an image.
-            if len(page_text) < 20: # A small threshold to detect image-only pages
+            if len(page_text) < 20:
                 print(f"Page {page_num + 1} seems to be an image. Performing OCR...")
-                # Render the page as a high-resolution image
                 pix = page.get_pixmap(dpi=300)
-                # Convert the pixmap to a Pillow Image object
                 img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                # Use our existing OCR function on the image object
                 ocr_text = extract_text_from_image(img)
                 full_text.append(ocr_text)
             else:
                 full_text.append(page_text)
-        
         pdf_document.close()
-        # Join the text from all pages into a single string
         return "\n".join(full_text).strip()
-        
     except Exception as e:
         print(f"Could not process PDF file '{os.path.basename(file_path)}'. Error: {e}")
+        return None
+
+def extract_text_from_docx(file_path):
+    """Extracts text from a Microsoft Word (.docx) file."""
+    try:
+        document = docx.Document(file_path)
+        # Create a list of the text from each paragraph in the document
+        full_text = [para.text for para in document.paragraphs]
+        # Join the list of paragraphs into a single string with newlines
+        return "\n".join(full_text).strip()
+    except Exception as e:
+        print(f"Could not process Word file '{os.path.basename(file_path)}'. Error: {e}")
         return None
 
 def translate_text_to_english(text):
@@ -136,6 +130,9 @@ def process_files_in_folder():
     elif file_extension == '.pdf':
         print("File identified as a PDF. Extracting text...")
         original_text = extract_text_from_pdf(file_path)
+    elif file_extension == '.docx':
+        print("File identified as a Word document. Extracting text...")
+        original_text = extract_text_from_docx(file_path)
     else:
         print(f"Unsupported file type: '{file_extension}'. This file will be moved without processing.")
 
